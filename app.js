@@ -2,47 +2,27 @@ const express =require("express");
 const bodyparser = require("body-parser");
 
 const app = express();
+
+var items=[];
+
+let workItems =[];
 app.set('view engine', 'ejs');
+
+app.use(bodyparser.urlencoded({extended:true}));
+app.use(express.static("public"));
 
 app.get("/",function(req,res){
 //  res.send("hello");//data send from server to browser
 var today = new Date();
-var currentDay = today.getDay();
-var day ="";
 
-switch (currentDay) {
-  case 0:
-  day = "sunday";
+var options ={
+  weekday:"long",
+  day:"numeric",
+  month:"long"
 
-    break;
-    case 1:
-    day = "monday";
+};
 
-      break;
-      case 2:
-      day = "tuesday";
-
-        break;
-        case 3:
-        day = "wednesday";
-
-          break;
-          case 4:
-          day = "thursday";
-
-            break;
-            case 5:
-            day = "friday";
-
-              break;
-              case 6:
-              day = "saturday";
-
-                break;
-  default:
-  console.log("error: current day is equal " + currentDay);
-
-}
+var day = today.toLocaleDateString("en-US",options);
 
 
 /*if(currentDay===6 || currentDay===0){
@@ -54,7 +34,37 @@ day = "weekend";
 
 
 }*/
-res.render("list", {kindOfDay: day});//ejs
+res.render("list", {listTitle: day,newListItem:items});//ejs
+});
+
+app.post("/",function(req,res){
+
+  item =req.body.newItem;
+  if(req.body.list==="work"){
+    workItems.push(item);
+    res.redirect("/work");
+  }else{
+    items.push(item);
+
+    res.redirect("/");
+  }
+
+
+
+});
+
+app.get("/work",function(req,res){
+  res.render("list",{listTitle:"work list",newListItem:workItems});
+});
+
+app.get("/about",function(req,res){
+  res.render("about");
+});
+
+app.post("/work",function(req,res){
+  let item = req.body.newItem;
+  workItems.push(item);
+  res.redirect("/work");
 });
 
 
